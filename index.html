@@ -33,7 +33,7 @@
         }
         
         .header {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+            background: linear-gradient(45deg, #007e5e, #0f2b46)
             color: white;
             padding: 20px;
             text-align: center;
@@ -122,11 +122,11 @@
         }
         
         .input-field:focus {
-            border-color: #007bff;
+            border-color: #007e5e;
         }
         
         .send-button {
-            background: #007bff;
+            background: #007e5e;
             color: white;
             border: none;
             border-radius: 50%;
@@ -141,7 +141,7 @@
         }
         
         .send-button:hover:not(:disabled) {
-            background: #0056b3;
+            background: #0f2b46;
         }
         
         .send-button:disabled {
@@ -242,11 +242,12 @@
     <div class="container">
         <div class="header">
             <h1>🤖 Tuteur IA - Projet Web</h1>
-            <p>Assistant pédagogique pour HTML, CSS, JavaScript et Vue.js</p>
+            <p>Assistant pédagogique pour le cours Web 5 enseigné par Marie-Michelle</p>
+            <p>Sujets: HTML, CSS, JavaScript, Vue.js</p>
         </div>
         
         <div class="usage-counter" id="usageCounter">
-            Questions posées: <span id="questionCount">0</span>/20 cette session
+            Questions posées: <span id="questionCount">0</span>/20 cette session (automne 2025)
             <button class="clear-button" onclick="clearChat()">Nouvelle conversation</button>
         </div>
         
@@ -254,7 +255,7 @@
             <div class="messages" id="messages">
                 <div class="message assistant">
                     <div class="message-content">
-                        👋 Bonjour ! Je suis votre tuteur IA pour le projet web. Je suis ici pour vous guider dans votre apprentissage du HTML, CSS, JavaScript et Vue.js.
+                        👋 Bonjour ! Je suis votre tuteur IA pour le cours Web 5. Je suis ici pour vous guider dans votre apprentissage du HTML, CSS, JavaScript et Vue.js.
                         <br><br>
                         💡 <strong>Comment je fonctionne :</strong>
                         <br>• Je pose des questions pour vous faire réfléchir
