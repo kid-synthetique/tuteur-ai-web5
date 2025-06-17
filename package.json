@@ -1,0 +1,21 @@
+{
+  "name": "tuteur-ai-web5",
+  "version": "1.0.0",
+  "description": "Tuteur IA pour cours Web 5 - CÉGEP",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static site, no build needed'"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.38.1"
+  },
+  "keywords": [
+    "education",
+    "ai-tutor",
+    "web-development",
+    "cegep"
+  ],
+  "author": "Marie-Michelle Ouellet",
+  "license": "MIT"
+}
