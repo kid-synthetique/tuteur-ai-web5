@@ -284,6 +284,16 @@
         let questionCount = 0;
         let conversationHistory = [];
 
+        // Fonction pour échapper les caractères HTML
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Fonction pour appeler l'API via Netlify Functions
         async function callTutorAPI(message, history) {
             try {
@@ -395,9 +405,10 @@
                 const response = await callTutorAPI(message, conversationHistory);
                 
                 hideLoading();
-                addMessage(response);
-                conversationHistory.push({ role: 'assistant', content: response });
-                
+                formattedResponse = escapeHtml(response);
+                addMessage(formattedResponse);
+                conversationHistory.push({ role: 'assistant', content: formattedResponse });
+
             } catch (error) {
                 hideLoading();
                 showError('Impossible de contacter le tuteur IA. Vérifiez votre connexion ou réessayez plus tard.');
