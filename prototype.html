@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuteur IA - Projet Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-field:focus {
+            border-color: #007bff;
+        }
+        
+        .send-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        code {
+            background: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Tuteur IA - Projet Web</h1>
+            <p>Assistant pédagogique pour HTML, CSS, JavaScript et Vue.js</p>
+        </div>
+        
+        <div class="warning">
+            ⚠️ <strong>Prototype de démonstration</strong> - Cette version simule les réponses du tuteur IA. La version finale utilisera une vraie API d'IA.
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 Bonjour ! Je suis votre tuteur IA pour le projet web. Je suis ici pour vous guider dans votre apprentissage, pas pour faire le travail à votre place !
+                        <br><br>
+                        💡 <strong>Comment je fonctionne :</strong>
+                        <br>• Je pose des questions pour vous faire réfléchir
+                        <br>• Je vous guide vers la solution étape par étape  
+                        <br>• Je vous aide à comprendre vos erreurs
+                        <br><br>
+                        Partagez votre question ou votre problème de code !
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" class="input-field" id="messageInput" placeholder="Décrivez votre problème ou posez votre question..." maxlength="500">
+                <button class="send-button" id="sendButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Système de réponses simulées pour la démonstration
+        const tutorResponses = {
+            // Réponses pour les erreurs communes
+            'erreur': [
+                "🔍 Avant que je puisse vous aider, pouvez-vous me dire :\n• Quel message d'erreur voyez-vous exactement ?\n• Dans quelle partie de votre code pensez-vous que le problème se trouve ?\n• Avez-vous vérifié la console du navigateur ?",
+                "🤔 Excellente question ! Pour mieux vous guider :\n• Pouvez-vous me montrer la ligne de code qui pose problème ?\n• Qu'attendiez-vous qu'il se passe ?\n• Qu'est-ce qui se passe à la place ?"
+            ],
+            'html': [
+                "📝 Pour le HTML, commençons par les bases :\n• Votre balise est-elle correctement fermée ?\n• Avez-vous utilisé les bons attributs ?\n• La structure sémantique est-elle logique ?\n\nMontrez-moi votre code et dites-moi ce qui ne fonctionne pas !",
+                "🏗️ Bonne question sur le HTML ! \n• Avez-vous validé votre HTML avec un validateur ?\n• Votre DOCTYPE est-il présent ?\n• Les éléments sont-ils dans le bon ordre hiérarchique ?"
+            ],
+            'css': [
+                "🎨 Pour résoudre votre problème CSS :\n• Avez-vous inspecté l'élément dans les outils de développement ?\n• Y a-t-il des règles CSS qui se chevauchent ?\n• Votre sélecteur cible-t-il le bon élément ?\n\nMontrez-moi le CSS et décrivez le comportement attendu vs actuel !",
+                "💅 Question intéressante sur le CSS !\n• Utilisez-vous les bonnes unités (px, em, rem, %) ?\n• Avez-vous pensé au box-model ?\n• L'élément parent affecte-t-il le comportement ?"
+            ],
+            'javascript': [
+                "⚡ Pour déboguer votre JavaScript :\n• Avez-vous ouvert la console pour voir les erreurs ?\n• Vos variables sont-elles bien déclarées ?\n• La fonction est-elle appelée au bon moment ?\n\nMontrez-moi le code et l'erreur exacte !",
+                "🔧 Problème JavaScript détecté !\n• Avez-vous testé votre fonction avec des console.log() ?\n• Les types de données sont-ils corrects ?\n• Y a-t-il des problèmes d'async/await ou de callbacks ?"
+            ],
+            'vue': [
+                "⚙️ Pour Vue.js, vérifions les concepts fondamentaux :\n• Comprenez-vous le concept de réactivité ?\n• Votre composant est-il correctement structuré ?\n• Les props et events sont-ils bien gérés ?\n\nQuel aspect de Vue.js vous pose problème ?",
+                "🔄 Question sur Vue.js !\n• Avez-vous bien importé Vue ?\n• Votre template utilise-t-il la bonne syntaxe ?\n• Les méthodes sont-elles dans le bon lifecycle hook ?"
+            ],
+            'default': [
+                "🤔 Je vois que vous avez une question ! Pour mieux vous aider :\n• Pouvez-vous être plus spécifique sur votre problème ?\n• S'agit-il d'HTML, CSS, JavaScript ou Vue.js ?\n• Avez-vous un message d'erreur ou un comportement inattendu ?",
+                "💡 Intéressant ! Pour vous guider efficacement :\n• Décrivez-moi votre objectif\n• Qu'avez-vous déjà essayé ?\n• Où êtes-vous bloqué exactement ?\n\nJe suis là pour vous faire réfléchir et apprendre ! 😊"
+            ]
+        };
+
+        // Réponses pour éviter de faire le travail à la place de l'étudiant
+        const avoidDirectAnswers = [
+            "🚫 Je ne peux pas vous donner la solution complète ! À la place, réfléchissons ensemble :\n• Quelle est votre première idée pour résoudre cela ?\n• Avez-vous regardé des exemples similaires ?\n• Que vous dit votre intuition ?",
+            "⚠️ Mon rôle est de vous guider, pas de faire à votre place ! \n• Commencez par me dire votre approche\n• Qu'avez-vous déjà essayé ?\n• Où pensez-vous que le problème pourrait être ?",
+            "📚 L'apprentissage passe par la pratique ! \n• Que suggère la documentation ?\n• Pouvez-vous diviser le problème en étapes plus simples ?\n• Quelle partie vous semble la plus logique à commencer ?"
+        ];
+
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function getRandomResponse(category) {
+            const responses = tutorResponses[category] || tutorResponses.default;
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function detectCategory(message) {
+            const lower = message.toLowerCase();
+            
+            // Détection de tentatives de contournement
+            if (lower.includes('fais') || lower.includes('donne moi') || lower.includes('écris') || 
+                lower.includes('code complet') || lower.includes('solution complète')) {
+                return 'avoid';
+            }
+            
+            if (lower.includes('html')) return 'html';
+            if (lower.includes('css') || lower.includes('style')) return 'css';
+            if (lower.includes('javascript') || lower.includes('js') || lower.includes('fonction')) return 'javascript';
+            if (lower.includes('vue') || lower.includes('composant')) return 'vue';
+            if (lower.includes('erreur') || lower.includes('bug') || lower.includes('marche pas')) return 'erreur';
+            
+            return 'default';
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.innerHTML = '<div class="message-content loading">Le tuteur réfléchit<span class="loading-dots"></span></div>';
+            loadingDiv.id = 'loading-message';
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Ajouter le message de l'utilisateur
+            addMessage(message, true);
+            messageInput.value = '';
+            sendButton.disabled = true;
+
+            // Montrer le loading
+            showLoading();
+
+            // Simuler un délai de réponse
+            await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+
+            hideLoading();
+
+            // Déterminer la catégorie et générer une réponse
+            const category = detectCategory(message);
+            let response;
+
+            if (category === 'avoid') {
+                response = avoidDirectAnswers[Math.floor(Math.random() * avoidDirectAnswers.length)];
+            } else {
+                response = getRandomResponse(category);
+            }
+
+            addMessage(response);
+            sendButton.disabled = false;
+            messageInput.focus();
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Focus initial
+        messageInput.focus();
+    </script>
+</body>
+</html>
