@@ -290,6 +290,11 @@
     </div>
 
     <script>
+        // Quand un étudiant arrive sur la page
+        gtag('event', 'tuteur_session_start', {
+            'user_agent': navigator.userAgent
+        });
+
         // Configuration
         const MAX_QUESTIONS_PER_SESSION = 20;
         let questionCount = 0;
@@ -410,6 +415,13 @@
 
             // Montrer le loading
             showLoading();
+
+            // 🔥 TRACKING : Question posée
+            gtag('event', 'question_asked', {
+                'question_text': message,
+                'question_length': message.length,
+                'timestamp': new Date().toISOString()
+            });
 
             try {
                 // Appeler l'API
