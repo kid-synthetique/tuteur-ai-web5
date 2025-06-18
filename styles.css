@@ -44,7 +44,7 @@ body {
 }
 
 .header {
-    background: linear-gradient(45deg, var(--gris-fonce), var(--bleu));
+    background: linear-gradient(45deg, var(--gris-fonce) 40%, var(--bleu) 100%);
     color: white;
     padding: 20px;
     text-align: center;
@@ -67,6 +67,10 @@ body {
     font-size: 0.7em;
     margin: 2em 0 -0.9em 0;
     opacity: 0.6;
+}
+
+a{
+    color: var(--rouge);
 }
 
 .chat-container {
