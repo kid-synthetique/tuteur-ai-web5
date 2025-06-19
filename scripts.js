@@ -68,10 +68,10 @@ function addMessage(content, isUser = false) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
 
-    escapedContent = escapeHtml(content);
+    /*escapedContent = escapeHtml(content);*/
 
     // Formatage du contenu avec support markdown basique
-    let formattedContent = escapedContent
+    let formattedContent = content
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
@@ -140,9 +140,9 @@ async function sendMessage() {
         const response = await callTutorAPI(message, conversationHistory);
 
         hideLoading();
-        formattedResponse = escapeHtml(response);
-        addMessage(formattedResponse);
-        conversationHistory.push({ role: 'assistant', content: formattedResponse });
+        /*formattedResponse = escapeHtml(response);*/
+        addMessage(response);
+        conversationHistory.push({ role: 'assistant', content: response });
 
     } catch (error) {
         hideLoading();
