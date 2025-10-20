@@ -31,11 +31,26 @@
                 <br>```
             </div>
         </div>
-
+<!--  
         <div class="usage-counter" id="usageCounter">
             Questions posées: <span id="questionCount">0</span>/20 cette session (automne 2025)
             <button class="clear-button" onclick="clearChat()">Nouvelle conversation</button>
         </div>
+-->
+        <div class="usage-counter" id="usageCounter">
+            <div class="counter-left">
+                <span>Questions: <strong id="questionCount">0</strong>/20 cette session (A25)</span> 
+            </div>
+            <div class="action-buttons">
+                <button class="action-button share" id="shareButton" onclick="openShareModal()" disabled>
+                    📤 Partager la conversation (Lien)
+                </button>
+                <button class="action-button" onclick="clearChat()">
+                    🔄 Nouvelle conversation
+                </button>
+            </div>
+        </div>
+        
 
         <div class="chat-container">
             <div class="messages" id="messages">
