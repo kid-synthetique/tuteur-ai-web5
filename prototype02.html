@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuteur IA - Projet Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            resize: none;
+            min-height: 45px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+        
+        .input-field:focus {
+            border-color: #007bff;
+        }
+        
+        .send-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .loading-dots {
+            display: inline-block;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 12px;
+            overflow-x: auto;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        
+        .usage-counter {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 20px 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .counter-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .action-button:hover {
+            background: #5a6268;
+        }
+        
+        .action-button.share {
+            background: #28a745;
+        }
+        
+        .action-button.share:hover {
+            background: #218838;
+        }
+        
+        .action-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Modal pour partage */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: #333;
+            font-size: 1.3em;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .share-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .share-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .share-option:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+        
+        .share-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .share-option-content {
+            flex: 1;
+        }
+        
+        .share-option-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .share-option-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .student-name-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .generate-button {
+            width: 100%;
+            padding: 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .generate-button:hover {
+            background: #218838;
+        }
+        
+        .share-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+        }
+        
+        .share-result textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 100px;
+            margin: 10px 0;
+        }
+        
+        .copy-button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .copy-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Tuteur IA - Projet Web</h1>
+            <p>Assistant pédagogique pour HTML, CSS, JavaScript et Vue.js</p>
+        </div>
+        
+        <div class="usage-counter" id="usageCounter">
+            <div class="counter-left">
+                <span>Questions: <strong id="questionCount">0</strong>/20</span>
+            </div>
+            <div class="action-buttons">
+                <button class="action-button share" id="shareButton" onclick="openShareModal()" disabled>
+                    📤 Partager la conversation
+                </button>
+                <button class="action-button" onclick="clearChat()">
+                    🔄 Nouvelle conversation
+                </button>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 Bonjour ! Je suis votre tuteur IA pour le projet web. Je suis ici pour vous guider dans votre apprentissage du HTML, CSS, JavaScript et Vue.js.
+                        <br><br>
+                        💡 <strong>Comment je fonctionne :</strong>
+                        <br>• Je pose des questions pour vous faire réfléchir
+                        <br>• Je vous guide vers la solution étape par étape  
+                        <br>• Je vous aide à comprendre vos erreurs
+                        <br>• Je ne fais PAS le travail à votre place
+                        <br><br>
+                        🚀 Partagez votre question, votre code ou décrivez votre problème !
+                        <br><br>
+                        📤 <em>N'oubliez pas de partager votre conversation avec votre enseignante à la fin !</em>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <textarea class="input-field" id="messageInput" placeholder="Décrivez votre problème, partagez votre code, ou posez votre question..." maxlength="1000" rows="1"></textarea>
+                <button class="send-button" id="sendButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de partage -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Partager la conversation</h2>
+                <span class="close" onclick="closeShareModal()">&times;</span>
+            </div>
+            
+            <p style="color: #666; margin-bottom: 20px;">
+                Choisissez comment vous souhaitez partager votre conversation avec votre enseignante :
+            </p>
+            
+            <input type="text" class="student-name-input" id="studentName" placeholder="Votre nom (optionnel)">
+            
+            <div class="share-options">
+                <label class="share-option">
+                    <input type="radio" name="shareMethod" value="text" checked>
+                    <div class="share-option-content">
+                        <div class="share-option-title">📝 Format texte</div>
+                        <div class="share-option-desc">Conversation formatée en texte, facile à copier-coller dans un email ou document</div>
+                    </div>
+                </label>
+                
+                <label class="share-option">
+                    <input type="radio" name="shareMethod" value="json">
+                    <div class="share-option-content">
+                        <div class="share-option-title">💾 Format JSON</div>
+                        <div class="share-option-desc">Format structuré pour sauvegarde ou traitement automatisé</div>
+                    </div>
+                </label>
+                
+                <label class="share-option">
+                    <input type="radio" name="shareMethod" value="html">
+                    <div class="share-option-content">
+                        <div class="share-option-title">🌐 Page HTML</div>
+                        <div class="share-option-desc">Conversation dans une page web complète et stylisée</div>
+                    </div>
+                </label>
+            </div>
+            
+            <button class="generate-button" onclick="generateShare()">Générer le partage</button>
+            
+            <div id="shareResult" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const MAX_QUESTIONS_PER_SESSION = 20;
+        let questionCount = 0;
+        let conversationHistory = [];
+
+        // Fonction pour appeler l'API via Netlify Functions
+        async function callTutorAPI(message, history) {
+            try {
+                const response = await fetch('/.netlify/functions/tutor-ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: history.slice(-10)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        // Gestion des éléments DOM
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const questionCountElement = document.getElementById('questionCount');
+        const shareButton = document.getElementById('shareButton');
+
+        function updateQuestionCounter() {
+            questionCountElement.textContent = questionCount;
+            
+            // Activer le bouton de partage s'il y a des messages
+            if (conversationHistory.length > 0) {
+                shareButton.disabled = false;
+            }
+            
+            if (questionCount >= MAX_QUESTIONS_PER_SESSION) {
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+                addMessage("⚠️ Limite de questions atteinte pour cette session. N'oubliez pas de partager votre conversation avec votre enseignante avant de cliquer sur 'Nouvelle conversation' !");
+            }
+        }
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            let formattedContent = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+                .replace(/\n/g, '<br>');
+            
+            contentDiv.innerHTML = formattedContent;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.innerHTML = '<div class="message-content loading">Le tuteur réfléchit<span class="loading-dots"></span></div>';
+            loadingDiv.id = 'loading-message';
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `❌ <strong>Erreur:</strong> ${message}`;
+            document.querySelector('.chat-container').insertBefore(errorDiv, document.querySelector('.messages'));
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 10000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.innerHTML = `✅ ${message}`;
+            document.querySelector('.chat-container').insertBefore(successDiv, document.querySelector('.messages'));
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || questionCount >= MAX_QUESTIONS_PER_SESSION) return;
+
+            addMessage(message, true);
+            conversationHistory.push({ role: 'user', content: message, timestamp: new Date().toISOString() });
+            
+            messageInput.value = '';
+            sendButton.disabled = true;
+            questionCount++;
+            updateQuestionCounter();
+
+            showLoading();
+
+            try {
+                const response = await callTutorAPI(message, conversationHistory);
+                
+                hideLoading();
+                addMessage(response);
+                conversationHistory.push({ role: 'assistant', content: response, timestamp: new Date().toISOString() });
+                
+            } catch (error) {
+                hideLoading();
+                showError('Impossible de contacter le tuteur IA. Vérifiez votre connexion ou réessayez plus tard.');
+                console.error('Erreur:', error);
+            }
+
+            sendButton.disabled = false;
+            autoResize();
+            messageInput.focus();
+        }
+
+        function clearChat() {
+            if (conversationHistory.length > 2 && !confirm('⚠️ Avez-vous partagé votre conversation avec votre enseignante ? Cliquez sur Annuler pour revenir et partager, ou OK pour effacer.')) {
+                return;
+            }
+            
+            messagesContainer.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 Nouvelle conversation démarrée ! Je suis prêt à vous aider avec vos questions de développement web.
+                        <br><br>
+                        Partagez votre code, décrivez votre problème ou posez votre question !
+                        <br><br>
+                        📤 <em>N'oubliez pas de partager votre conversation avec votre enseignante à la fin !</em>
+                    </div>
+                </div>
+            `;
+            conversationHistory = [];
+            questionCount = 0;
+            updateQuestionCounter();
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            shareButton.disabled = true;
+            messageInput.focus();
+        }
+
+        function autoResize() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+        }
+
+        // Fonctions du modal de partage
+        function openShareModal() {
+            document.getElementById('shareModal').style.display = 'block';
+            document.getElementById('shareResult').style.display = 'none';
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        function generateShare() {
+            const studentName = document.getElementById('studentName').value.trim() || 'Étudiant anonyme';
+            const selectedMethod = document.querySelector('input[name="shareMethod"]:checked').value;
+            
+            let shareContent = '';
+            
+            if (selectedMethod === 'text') {
+                shareContent = generateTextShare(studentName);
+            } else if (selectedMethod === 'json') {
+                shareContent = generateJSONShare(studentName);
+            } else if (selectedMethod === 'html') {
+                shareContent = generateHTMLShare(studentName);
+            }
+            
+            displayShareResult(shareContent, selectedMethod);
+        }
+
+        function generateTextShare(studentName) {
+            const date = new Date().toLocaleString('fr-CA');
+            let text = `=================================================\n`;
+            text += `CONVERSATION TUTEUR IA - PROJET WEB\n`;
+            text += `=================================================\n\n`;
+            text += `Étudiant: ${studentName}\n`;
+            text += `Date: ${date}\n`;
+            text += `Nombre de questions: ${questionCount}\n\n`;
+            text += `=================================================\n\n`;
+            
+            conversationHistory.forEach((msg, index) => {
+                if (msg.role === 'user') {
+                    text += `[ÉTUDIANT]\n${msg.content}\n\n`;
+                } else {
+                    text += `[TUTEUR IA]\n${msg.content}\n\n`;
+                }
+                text += `-------------------------------------------------\n\n`;
+            });
+            
+            return text;
+        }
+
+        function generateJSONShare(studentName) {
+            const shareData = {
+                student: studentName,
+                date: new Date().toISOString(),
+                questionCount: questionCount,
+                conversation: conversationHistory
+            };
+            
+            return JSON.stringify(shareData, null, 2);
+        }
+
+        function generateHTMLShare(studentName) {
+            const date = new Date().toLocaleString('fr-CA');
+            let html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation - ${studentName}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+        .header { background: linear-gradient(45deg, #4CAF50, #45a049); color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; }
+        .header h1 { margin: 0 0 10px 0; }
+        .info { background: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #4CAF50; }
+        .message { background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .message.user { border-left: 4px solid #007bff; }
+        .message.assistant { border-left: 4px solid #4CAF50; }
+        .role { font-weight: bold; color: #666; margin-bottom: 10px; }
+        .content { line-height: 1.6; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Conversation avec le Tuteur IA</h1>
+        <p>Cours: Projet Web - Techniques d'intégration multimédia</p>
+    </div>
+    <div class="info">
+        <strong>Étudiant:</strong> ${studentName}<br>
+        <strong>Date:</strong> ${date}<br>
+        <strong>Questions posées:</strong> ${questionCount}
+    </div>
+`;
+            
+            conversationHistory.forEach((msg) => {
+                const roleLabel = msg.role === 'user' ? '👤 ÉTUDIANT' : '🤖 TUTEUR IA';
+                const cssClass = msg.role === 'user' ? 'user' : 'assistant';
+                html += `    <div class="message ${cssClass}">
+        <div class="role">${roleLabel}</div>
+        <div class="content">${msg.content.replace(/\n/g, '<br>')}</div>
+    </div>\n`;
+            });
+            
+            html += `</body>\n</html>`;
+            return html;
+        }
+
+        function displayShareResult(content, method) {
+            const resultDiv = document.getElementById('shareResult');
+            const extension = method === 'html' ? '.html' : method === 'json' ? '.json' : '.txt';
+            
+            resultDiv.innerHTML = `
+                <h3 style="margin-top: 0;">✅ Contenu généré !</h3>
+                <p style="color: #666; margin-bottom: 10px;">Copiez le contenu ci-dessous et envoyez-le à votre enseignante :</p>
+                <textarea id="shareContent" readonly>${content}</textarea>
+                <button class="copy-button" onclick="copyShareContent()">📋 Copier dans le presse-papier</button>
+                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                    💡 <strong>Astuce:</strong> Vous pouvez aussi sauvegarder ce contenu dans un fichier <code>conversation${extension}</code> et le joindre à votre remise de travaux.
+                </p>
+            `;
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function copyShareContent() {
+            const textarea = document.getElementById('shareContent');
+            textarea.select();
+            document.execCommand('copy');
+            showSuccess('Contenu copié dans le presse-papier !');
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        messageInput.addEventListener('input', autoResize);
+
+        // Fermer modal si clic à l'extérieur
+        window.onclick = function(event) {
+            const modal = document.getElementById('shareModal');
+            if (event.target === modal) {
+                closeShareModal();
+            }
+        };
+
+        // Focus initial
+        messageInput.focus();
+        updateQuestionCounter();
+    </script>
+</body>
+</html>
